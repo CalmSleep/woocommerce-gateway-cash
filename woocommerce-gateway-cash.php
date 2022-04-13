@@ -76,8 +76,19 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wc_cash_gatew
 add_filter( 'woocommerce_available_payment_gateways', 'bbloomer_paypal_enable_manager' );
 
 function bbloomer_paypal_enable_manager( $available_gateways ) {
-	if ( isset( $available_gateways['cash_gateway'] ) && ! current_user_can( 'manage_woocommerce' ) ) {
-		unset( $available_gateways['cash_gateway'] );
+	if ( isset( $available_gateways['cash_gateway'] ) ) {
+		/*
+		//if user can manage woocommerce can set cash as payment method
+		if(! current_user_can( 'manage_woocommerce' )){
+			unset( $available_gateways['cash_gateway'] );
+		}
+		*/
+		//if order is pickup can select cash as payment method
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+      	$chosen_shipping = $chosen_methods[0];
+		if ($chosen_shipping != 'calmPickupShippingMethod') {
+			unset( $available_gateways['cash_gateway'] );
+		}
 	} 
 	return $available_gateways;
 }
@@ -111,7 +122,7 @@ function wc_cash_gateway_init() {
 			$this->icon               = apply_filters('woocommerce_cash_icon', '');
 			$this->has_fields         = false;
 			$this->method_title       = __( 'Cash', 'wc-gateway-cash' );
-			$this->method_description = __( 'Allows cash payments. Very handy if you use your cheque gateway for another payment method, and can help with testing. Orders are marked as "on-hold" when received.', 'wc-gateway-cash' );
+			$this->method_description = __( 'Habilita pagos en efectivo. Las ordenes que se realicen entran en "on-hold".', 'wc-gateway-cash' );
 			
 			// Load the settings.
 			$this->init_form_fields();
@@ -139,32 +150,32 @@ function wc_cash_gateway_init() {
 			$this->form_fields = apply_filters( 'wc_cash_form_fields', array(
 				
 				'enabled' => array(
-					'title'   => __( 'Enable/Disable', 'wc-gateway-cash' ),
+					'title'   => __( 'Habilita/Deshabilita', 'wc-gateway-cash' ),
 					'type'    => 'checkbox',
-					'label'   => __( 'Enable Cash Payment', 'wc-gateway-cash' ),
+					'label'   => __( 'Habilita el metodo de pago Cash', 'wc-gateway-cash' ),
 					'default' => 'yes'
 				),
 				
 				'title' => array(
-					'title'       => __( 'Title', 'wc-gateway-cash' ),
+					'title'       => __( 'Título', 'wc-gateway-cash' ),
 					'type'        => 'text',
-					'description' => __( 'This controls the title for the payment method the customer sees during checkout.', 'wc-gateway-cash' ),
-					'default'     => __( 'Cash Payment', 'wc-gateway-cash' ),
+					'description' => __( 'Esto es para definir el título del método de pago que los clientes ven en el checkout.', 'wc-gateway-cash' ),
+					'default'     => __( 'Pago en efectivo', 'wc-gateway-cash' ),
 					'desc_tip'    => true,
 				),
 				
 				'description' => array(
-					'title'       => __( 'Description', 'wc-gateway-cash' ),
+					'title'       => __( 'Descripción', 'wc-gateway-cash' ),
 					'type'        => 'textarea',
-					'description' => __( 'Payment method description that the customer will see on your checkout.', 'wc-gateway-cash' ),
-					'default'     => __( 'Please remit payment to Store Name upon pickup or delivery.', 'wc-gateway-cash' ),
+					'description' => __( 'Esto es para definir la descripción del método de pago que los clientes ven en el checkout.', 'wc-gateway-cash' ),
+					'default'     => __( 'Pagá en efectivo en el local cuando venís a retirar el pedido.', 'wc-gateway-cash' ),
 					'desc_tip'    => true,
 				),
 				
 				'instructions' => array(
-					'title'       => __( 'Instructions', 'wc-gateway-cash' ),
+					'title'       => __( 'Instrucciones', 'wc-gateway-cash' ),
 					'type'        => 'textarea',
-					'description' => __( 'Instructions that will be added to the thank you page and emails.', 'wc-gateway-cash' ),
+					'description' => __( 'Instrucciones que se agregan en el mail y thank you page.', 'wc-gateway-cash' ),
 					'default'     => '',
 					'desc_tip'    => true,
 				),
