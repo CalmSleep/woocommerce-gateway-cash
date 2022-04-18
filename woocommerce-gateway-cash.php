@@ -84,10 +84,12 @@ function bbloomer_paypal_enable_manager( $available_gateways ) {
 		}
 		*/
 		//if order is pickup can select cash as payment method
-		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
-      	$chosen_shipping = $chosen_methods[0];
-		if ($chosen_shipping != 'calmPickupShippingMethod') {
-			unset( $available_gateways['cash_gateway'] );
+		if(WC()->session){
+			$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+			$chosen_shipping = $chosen_methods[0];
+			if ($chosen_shipping != 'calmPickupShippingMethod') {
+				unset( $available_gateways['cash_gateway'] );
+			}
 		}
 	} 
 	return $available_gateways;
